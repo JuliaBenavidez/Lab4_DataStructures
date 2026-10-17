@@ -1,0 +1,115 @@
+# %%
+# EXERCISE 3: TRANSACTION HISTORY ANALYZER
+
+from collections import Counter, defaultdict
+
+LAST_NAME = "Benavidez"
+STUDENT_ID = "TUPM-26-1835"
+SEED_NUM = int(STUDENT_ID[-1])
+FAVORITE_ARTIST = "DILAW"
+
+artist_values = [ord(c) % 10 for c in FAVORITE_ARTIST if c.isalpha()]
+
+# 1. Generate Transaction Records
+customers = [f"{LAST_NAME}_C{i}" for i in range(1, 6)]
+
+prices = {
+    "NOTEBOOK": 50,
+    "PEN": 15,
+    "USB": 250,
+    "HEADPHONES": 450,
+    "CALCULATOR": 300
+}
+
+products = list(prices)
+transactions = []
+
+for i in range(5):
+    quantity = 1 + ((SEED_NUM + artist_values[i]) % 4)
+
+    transactions.append({
+        "customer": customers[i],
+        "product": products[i],
+        "quantity": quantity,
+        "price": prices[products[i]],
+        "total": quantity * prices[products[i]]
+    })
+
+# Additional transaction
+transactions.append({
+    "customer": customers[0],
+    "product": "PEN",
+    "quantity": 2,
+    "price": prices["PEN"],
+    "total": 2 * prices["PEN"]
+})
+
+# One repeated customer-product transaction
+transactions.append(transactions[0].copy())
+
+# 2. Organize Transaction Data
+transactions.sort(key=lambda t: (t["customer"], t["product"]))
+
+print("\n=== 1. GENERATED TRANSACTION RECORDS ===")
+for t in transactions:
+    print(t)
+
+print("\n=== 2. ORGANIZED TRANSACTION DATA ===")
+for t in transactions:
+    print(f"{t['customer']} | {t['product']} | "
+          f"Qty: {t['quantity']} | Total: PHP {t['total']:.2f}")
+
+# 3. Repeated and Distinct Transactions
+counts = Counter((t["customer"], t["product"]) for t in transactions)
+
+print("\n=== 3. REPEATED / DISTINCT TRANSACTIONS ===")
+print("Repeated Purchases:")
+for key, count in counts.items():
+    if count > 1:
+        print(key, "appears", count, "times")
+
+print("Distinct Customers:",
+      sorted(set(t["customer"] for t in transactions)))
+print("Distinct Products:",
+      sorted(set(t["product"] for t in transactions)))
+
+# 4. Transaction Values
+print("\n=== 4. TRANSACTION VALUES ===")
+for t in transactions:
+    print(f"{t['customer']} - {t['product']}: "
+          f"PHP {t['total']:.2f}")
+
+# 5. Customer Summaries
+print("\n=== 5. CUSTOMER SUMMARIES ===")
+customer_totals = defaultdict(float)
+
+for t in transactions:
+    customer_totals[t["customer"]] += t["total"]
+
+for customer, total in sorted(customer_totals.items()):
+    print(f"{customer}: PHP {total:.2f}")
+
+# 6. Product Summaries
+print("\n=== 6. PRODUCT SUMMARIES ===")
+product_totals = defaultdict(float)
+
+for t in transactions:
+    product_totals[t["product"]] += t["total"]
+
+for product, total in sorted(product_totals.items()):
+    print(f"{product}: PHP {total:.2f}")
+
+# 7. Ordered Results
+print("\n=== 7. ORDERED RESULTS ===")
+for t in transactions:
+    print(f"{t['customer']} | {t['product']} | "
+          f"{t['quantity']} | PHP {t['total']:.2f}")
+
+# 8. Overall Transaction Summary
+grand_total = sum(t["total"] for t in transactions)
+
+print("\n=== 8. OVERALL TRANSACTION SUMMARY ===")
+print("Total transactions:", len(transactions))
+print("Distinct customers:", len(set(t["customer"] for t in transactions)))
+print("Distinct products:", len(set(t["product"] for t in transactions)))
+print(f"Grand total: PHP {grand_total:.2f}")

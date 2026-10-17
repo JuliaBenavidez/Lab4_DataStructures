@@ -1,0 +1,113 @@
+# %%
+# EXERCISE 2: STUDENT PERFORMANCE DATA ANALYZER
+
+from collections import Counter, defaultdict
+
+LAST_NAME = "Benavidez"
+STUDENT_ID = "TUPM-26-1835"
+SEED_NUM = int(STUDENT_ID[-1])
+FAVORITE_ARTIST = "DILAW"
+
+artist_values = [ord(c) % 10 for c in FAVORITE_ARTIST if c.isalpha()]
+
+# 1. Generate Performance Records
+students = [f"{LAST_NAME}_S{i}" for i in range(1, 6)]
+subjects = ["PROGRAMMING", "MATHEMATICS", "ELECTRONICS",
+            "PHYSICS", "ENGLISH"]
+
+records = []
+
+for i in range(5):
+    score = 60 + SEED_NUM + artist_values[i] + i
+    records.append({
+        "student": students[i],
+        "subject": subjects[i],
+        "score": score
+    })
+
+# Additional subject record
+records.append({
+    "student": students[0],
+    "subject": "MATHEMATICS",
+    "score": 60 + SEED_NUM + artist_values[1]
+})
+
+# One repeated student-subject record
+records.append(records[0].copy())
+
+# One incomplete record
+records.append({
+    "student": students[4],
+    "subject": "ENGLISH",
+    "score": None
+})
+
+def classify(score):
+    if score is None:
+        return "MISSING"
+    elif score >= 90:
+        return "EXCELLENT"
+    elif score >= 75:
+        return "SATISFACTORY"
+    return "NEEDS IMPROVEMENT"
+
+for r in records:
+    r["category"] = classify(r["score"])
+
+# 2. Organize Student and Subject Data
+records.sort(key=lambda r: (r["student"], r["subject"]))
+
+print("\n=== 1. GENERATED PERFORMANCE RECORDS ===")
+for r in records:
+    print(r)
+
+print("\n=== 2. ORGANIZED STUDENT/SUBJECT DATA ===")
+for r in records:
+    print(f"{r['student']} | {r['subject']} | {r['score']}")
+
+# 3. Repeated and Incomplete Records
+counts = Counter((r["student"], r["subject"]) for r in records)
+
+print("\n=== 3. REPEATED / INCOMPLETE RECORDS ===")
+print("Repeated Records:")
+for key, count in counts.items():
+    if count > 1:
+        print(key, "appears", count, "times")
+
+print("Incomplete Records:")
+for r in records:
+    if r["score"] is None:
+        print(r)
+
+# 4. Performance Categories
+print("\n=== 4. PERFORMANCE CATEGORIES ===")
+for r in records:
+    print(f"{r['student']} | {r['subject']} | {r['category']}")
+
+# 5. Student and Subject Summaries
+print("\n=== 5. STUDENT AND SUBJECT SUMMARIES ===")
+valid = [r for r in records if r["score"] is not None]
+
+for student in students:
+    scores = [r["score"] for r in valid if r["student"] == student]
+    if scores:
+        print(f"{student}: Average={sum(scores)/len(scores):.2f}")
+
+for subject in subjects:
+    scores = [r["score"] for r in valid if r["subject"] == subject]
+    if scores:
+        print(f"{subject}: Average={sum(scores)/len(scores):.2f}")
+
+# 6. Ordered Results
+print("\n=== 6. ORDERED RESULTS ===")
+for r in records:
+    print(f"{r['student']} | {r['subject']} | "
+          f"{r['score']} | {r['category']}")
+
+# 7. Final Report
+print("\n=== 7. FINAL REPORT ===")
+print("Total records:", len(records))
+print("Valid scores:", len(valid))
+print("Missing scores:", sum(r["score"] is None for r in records))
+print("Overall average:",
+      round(sum(r["score"] for r in valid) / len(valid), 2))
